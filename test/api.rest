@@ -1,2 +1,106 @@
-### GET REQUEST: Hello World!
-GET http://localhost:5000/
+### Health Check
+GET http://localhost:5000/health
+
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "johndoe",
+  "password": "password123"
+}
+
+### Get User Profile
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Create New Conversation
+POST http://localhost:5000/api/conversations
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "My First Chat"
+}
+
+### Get All Conversations
+GET http://localhost:5000/api/conversations
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Get Single Conversation with Messages
+GET http://localhost:5000/api/conversations/CONVERSATION_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Add Message to Conversation
+POST http://localhost:5000/api/messages
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "conversationId": "CONVERSATION_ID_HERE",
+  "content": "Hello, how are you?",
+  "role": "user"
+}
+
+### Add Assistant Response
+POST http://localhost:5000/api/messages
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "conversationId": "CONVERSATION_ID_HERE",
+  "content": "I'm doing well, thank you! How can I help you today?",
+  "role": "assistant"
+}
+
+### Get Messages for Conversation
+GET http://localhost:5000/api/messages/CONVERSATION_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Update Conversation Title
+PUT http://localhost:5000/api/conversations/CONVERSATION_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "Updated Chat Title"
+}
+
+### Archive Conversation
+PATCH http://localhost:5000/api/conversations/CONVERSATION_ID_HERE/archive
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "archived": true
+}
+
+### Delete Conversation
+DELETE http://localhost:5000/api/conversations/CONVERSATION_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Edit Message
+PUT http://localhost:5000/api/messages/MESSAGE_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "content": "Updated message content",
+  "role": "user"
+}
+
+### Delete Message
+DELETE http://localhost:5000/api/messages/MESSAGE_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
