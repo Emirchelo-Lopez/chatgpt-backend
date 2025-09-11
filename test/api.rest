@@ -1,0 +1,2 @@
+### GET REQUEST: Hello World!
+GET http://localhost:5000/
