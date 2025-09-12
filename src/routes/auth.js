@@ -11,6 +11,7 @@ import {
   registerValidationSchema,
   loginValidationSchema,
 } from "../utils/validationSchemas.js";
+import { auth } from "../middleware/auth.js";
 
 const router = Router();
 
