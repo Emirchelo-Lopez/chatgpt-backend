@@ -9,7 +9,12 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:5173", // Vite default port
+      "http://localhost:3000", // React default port (keep this)
+      "http://127.0.0.1:5174", // Alternative localhost format
+      "http://127.0.0.1:3000",
+    ],
     credentials: true,
   })
 );
