@@ -12,8 +12,8 @@ app.use(
     origin: [
       "http://localhost:5173", // Vite default port
       "http://localhost:3000", // React default port (keep this)
-      "http://127.0.0.1:5174", // Alternative localhost format
-      "http://127.0.0.1:3000",
+      process.env.FRONTEND_URL,
+      "https://*.vercel.app",
     ],
     credentials: true,
   })
@@ -58,35 +58,48 @@ app.use((req, res) => {
 
 // Database connection
 const connectDB = async () => {
+  if (mongoose.connections[0].readyState) {
+    return;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`.green.bold);
   } catch (error) {
     console.error(`Database connection error: ${error.message}`.red.bold);
-    process.exit(1);
+    throw error;
   }
 };
 
-// Start server
-const PORT = process.env.PORT || 5000;
+// Connect to database on each request (serverless pattern)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
-const startServer = async () => {
-  await connectDB();
-
+// For local development
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`.yellow.bold);
-    console.log(`📊 Environment: ${process.env.NODE_ENV}`.blue);
-    console.log(`🔗 Health check: http://localhost:${PORT}/health`.green);
   });
-};
-
-startServer();
+}
 
 // Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received. Shutting down gracefully...");
-  mongoose.connection.close(() => {
-    console.log("MongoDB connection closed.");
-    process.exit(0);
-  });
-});
+// process.on("SIGTERM", () => {
+//   console.log("SIGTERM received. Shutting down gracefully...");
+//   mongoose.connection.close(() => {
+//     console.log("MongoDB connection closed.");
+//     process.exit(0);
+//   });
+// });
+
+// Export the Express API for Vercel
+export default app;
