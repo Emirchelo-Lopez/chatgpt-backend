@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import authRoutes from "./auth.js";
 import conversationRoutes from "./conversations.js";
 import messageRoutes from "./messages.js";
@@ -35,36 +36,91 @@ router.get("/debug", (req, res) => {
   });
 });
 
-// Just for debugging (delete later)
+// Debug connection endpoint
 router.get("/debug-connection", async (req, res) => {
   console.log("=== CONNECTION DEBUG ===");
   console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
+  console.log(
+    "MONGO_URI preview:",
+    process.env.MONGO_URI
+      ? process.env.MONGO_URI.substring(0, 50) + "..."
+      : "Not found"
+  );
   console.log("NODE_ENV:", process.env.NODE_ENV);
   console.log("Mongoose connection state:", mongoose.connection.readyState);
+  console.log("Mongoose connection host:", mongoose.connection.host);
+  console.log("Mongoose connection name:", mongoose.connection.name);
+
+  // Connection states:
+  // 0 = disconnected
+  // 1 = connected
+  // 2 = connecting
+  // 3 = disconnecting
+
+  const connectionStates = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
+  };
 
   try {
-    // Try to connect directly
-    const testConnection = await mongoose.createConnection(
-      process.env.MONGO_URI
-    );
-    await testConnection.asPromise();
+    // Try a simple database operation
+    const adminResult = await mongoose.connection.db.admin().ping();
 
     res.json({
       success: true,
       connectionState: mongoose.connection.readyState,
-      message: "Connection test successful",
+      connectionStateName: connectionStates[mongoose.connection.readyState],
+      host: mongoose.connection.host,
+      databaseName: mongoose.connection.name,
+      ping: adminResult,
+      mongoUriExists: !!process.env.MONGO_URI,
+      message: "MongoDB connection is working",
     });
-
-    await testConnection.close();
   } catch (error) {
-    console.error("Direct connection test failed:", error);
+    console.error("Connection test failed:", error);
     res.status(500).json({
       success: false,
       error: error.message,
-      code: error.code,
+      errorCode: error.code,
       connectionState: mongoose.connection.readyState,
+      connectionStateName: connectionStates[mongoose.connection.readyState],
+      host: mongoose.connection.host,
+      databaseName: mongoose.connection.name,
+      mongoUriExists: !!process.env.MONGO_URI,
     });
   }
+});
+
+// Route to debug the connection string format
+router.get("/debug-uri", (req, res) => {
+  const uri = process.env.MONGO_URI;
+
+  if (!uri) {
+    return res.json({
+      success: false,
+      error: "MONGO_URI not found",
+    });
+  }
+
+  // Parse the URI to check its components
+  const parts = uri.split("/");
+  const hasDatabase = parts.length > 3 && parts[3] && !parts[3].startsWith("?");
+
+  // Hide password for security
+  const safeUri = uri.replace(/:([^:@]+)@/, ":****@");
+
+  res.json({
+    success: true,
+    connectionString: safeUri,
+    hasDatabaseName: hasDatabase,
+    databasePart: hasDatabase ? parts[3].split("?")[0] : "MISSING",
+    format: hasDatabase ? "CORRECT" : "INCORRECT - Missing database name",
+    advice: hasDatabase
+      ? "URI format looks good"
+      : "Add database name: /your-db-name before the ?",
+  });
 });
 
 export default router;
