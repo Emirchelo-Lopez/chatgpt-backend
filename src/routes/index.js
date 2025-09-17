@@ -35,4 +35,36 @@ router.get("/debug", (req, res) => {
   });
 });
 
+// Just for debugging (delete later)
+router.get("/debug-connection", async (req, res) => {
+  console.log("=== CONNECTION DEBUG ===");
+  console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("Mongoose connection state:", mongoose.connection.readyState);
+
+  try {
+    // Try to connect directly
+    const testConnection = await mongoose.createConnection(
+      process.env.MONGO_URI
+    );
+    await testConnection.asPromise();
+
+    res.json({
+      success: true,
+      connectionState: mongoose.connection.readyState,
+      message: "Connection test successful",
+    });
+
+    await testConnection.close();
+  } catch (error) {
+    console.error("Direct connection test failed:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code,
+      connectionState: mongoose.connection.readyState,
+    });
+  }
+});
+
 export default router;
