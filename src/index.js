@@ -66,7 +66,17 @@ const connectDB = async () => {
   }
 
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      // options for better connection handling
+      serverSelectionTimeoutMS: 15000, // Increase timeout to 15 seconds
+      socketTimeoutMS: 45000,
+      bufferMaxEntries: 0, // Disable buffering
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      retryWrites: true,
+      w: "majority",
+    });
+
     console.log(`MongoDB Connected: ${conn.connection.host}`.green.bold);
   } catch (error) {
     console.error(`Database connection error: ${error.message}`.red.bold);
