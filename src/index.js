@@ -13,6 +13,8 @@ app.use(
       "http://localhost:5173", // Vite default port
       "http://localhost:3000", // React default port (keep this)
       process.env.FRONTEND_URL,
+      "https://chatgpt-clone-hq0ydbhgu-emirchelo-lopezs-projects.vercel.app", // Add your specific frontend URL here
+      "https://*.vercel.app", // Keep this for other potential Vercel deployments
     ],
     credentials: true,
   })
