@@ -88,12 +88,11 @@ app.use(async (req, res, next) => {
 });
 
 // For local development
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`.yellow.bold);
-  });
-}
+// Start the server for all environments
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`.yellow.bold);
+});
 
 // Graceful shutdown
 // process.on("SIGTERM", () => {
