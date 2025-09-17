@@ -1,23 +1,26 @@
 import express from "express";
 import mongoose from "mongoose";
-// import cors from "cors";
+import cors from "cors";
 import colors from "colors";
 import routes from "./routes/index.js";
 
 const app = express();
 
 // Middleware
-// app.use(
-//   cors({
-//     origin: [
-//       "http://localhost:5173", // Vite default port
-//       "http://localhost:3000", // React default port (keep this)
-//       process.env.FRONTEND_URL,
-//       "https://*.vercel.app", // Keep this for other potential Vercel deployments
-//     ],
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      process.env.FRONTEND_URL,
+      "https://chatgpt-clone-hq0ydbhgu-emirchelo-lopezs-projects.vercel.app", // the specific frontend URL
+      "https://*.vercel.app",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Explicitly allow all methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Explicitly allow these headers
+  })
+);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
