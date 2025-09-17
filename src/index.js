@@ -13,7 +13,6 @@ app.use(
       "http://localhost:5173", // Vite default port
       "http://localhost:3000", // React default port (keep this)
       process.env.FRONTEND_URL,
-      "https://*.vercel.app",
     ],
     credentials: true,
   })
