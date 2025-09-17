@@ -49,7 +49,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Index for performance
-UserSchema.index({ username: 1 });
+// UserSchema.index({ username: 1 });
 UserSchema.index({ email: 1 });
 
 export const User = mongoose.model("User", UserSchema);
