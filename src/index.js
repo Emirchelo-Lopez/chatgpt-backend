@@ -1,3 +1,4 @@
+// src/index.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -13,12 +14,12 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
       process.env.FRONTEND_URL,
-      "https://chatgpt-clone-eight-cyan.vercel.app", // the universal frontend URL
+      "https://chatgpt-clone-eight-cyan.vercel.app",
       "https://*.vercel.app",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Explicitly allow all methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Explicitly allow these headers
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -59,59 +60,68 @@ app.use((req, res) => {
   });
 });
 
-// Database connection
+// Connect to MongoDB ONCE on startup
 const connectDB = async () => {
-  if (mongoose.connections[0].readyState) {
-    return;
-  }
-
   try {
+    console.log("🔄 Attempting to connect to MongoDB...".yellow);
+
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      // options for better connection handling
-      serverSelectionTimeoutMS: 15000, // Increase timeout to 15 seconds
-      socketTimeoutMS: 45000,
-      bufferMaxEntries: 0, // Disable buffering
+      serverSelectionTimeoutMS: 30000, // 30 seconds
+      socketTimeoutMS: 75000, // 75 seconds
+      connectTimeoutMS: 30000, // 30 seconds
       maxPoolSize: 10,
-      minPoolSize: 2,
+      minPoolSize: 5,
       retryWrites: true,
+      bufferMaxEntries: 0,
+      bufferCommands: false,
       w: "majority",
     });
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`.green.bold);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`.green.bold);
+    console.log(`📁 Database: ${conn.connection.name}`.green);
+
+    // Test the connection immediately
+    await conn.connection.db.admin().ping();
+    console.log("🏓 MongoDB ping successful".green);
   } catch (error) {
-    console.error(`Database connection error: ${error.message}`.red.bold);
-    throw error;
+    console.error(`❌ MongoDB connection failed:`.red.bold);
+    console.error(`Error: ${error.message}`.red);
+    console.error(`Stack: ${error.stack}`.red);
+
+    // Exit the process if we can't connect to the database
+    process.exit(1);
   }
 };
 
-// Connect to database on each request (serverless pattern)
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Database connection failed",
-    });
-  }
-});
+// app.use(async (req, res, next) => {
+//   try {
+//     await connectDB();
+//     next();
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Database connection failed",
+//     });
+//   }
+// });
 
-// For local development
-// Start the server for all environments
+// Connect to database on startup
+connectDB();
+
+// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`.yellow.bold);
 });
 
 // Graceful shutdown
-// process.on("SIGTERM", () => {
-//   console.log("SIGTERM received. Shutting down gracefully...");
-//   mongoose.connection.close(() => {
-//     console.log("MongoDB connection closed.");
-//     process.exit(0);
-//   });
-// });
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received. Shutting down gracefully...");
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed.");
+    process.exit(0);
+  });
+});
 
 // Export the Express API for Vercel
 export default app;
