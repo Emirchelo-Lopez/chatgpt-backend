@@ -13,7 +13,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
       process.env.FRONTEND_URL,
-      "https://chatgpt-clone-hq0ydbhgu-emirchelo-lopezs-projects.vercel.app", // the specific frontend URL
+      "https://chatgpt-clone-eight-cyan.vercel.app/", // the universal frontend URL
       "https://*.vercel.app",
     ],
     credentials: true,
