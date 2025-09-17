@@ -66,15 +66,24 @@ const connectDB = async () => {
     console.log("🔄 Attempting to connect to MongoDB...".yellow);
 
     const conn = await mongoose.connect(process.env.MONGO_URI, {
+      // Timeout settings
       serverSelectionTimeoutMS: 30000, // 30 seconds
       socketTimeoutMS: 75000, // 75 seconds
       connectTimeoutMS: 30000, // 30 seconds
+
+      // Connection pooling
       maxPoolSize: 10,
       minPoolSize: 5,
+
+      // Retry settings
       retryWrites: true,
-      bufferMaxEntries: 0,
-      bufferCommands: false,
+
+      // Write concern
       w: "majority",
+
+      // Remove these deprecated options:
+      // bufferMaxEntries: 0,     ❌ REMOVE
+      // bufferCommands: false,   ❌ REMOVE
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`.green.bold);
