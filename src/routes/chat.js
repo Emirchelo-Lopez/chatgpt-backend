@@ -10,7 +10,7 @@ router.post("/generate", auth, async (req, res) => {
 
     // Call Gemini API from backend
     const GOOGLE_API_KEY = process.env.GEMINI_API_KEY;
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_API_KEY}`;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`;
 
     const conversation =
       history && history.length > 0
